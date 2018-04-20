@@ -1,6 +1,7 @@
 package api;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
@@ -37,11 +38,12 @@ public class PlayerThread extends Thread {
 		byte[] buff = new byte[128];
 		double frameDuration = 1.0 / format.getFrameRate();
 		while (true) {
+			Arrays.fill(buff, (byte)0);
 			for (Tone tone : tones) {
 				for (int i = 0; i < buff.length; i ++) {
 					double time = frameDuration*(samples + i);
-					short amp = (short) (Math.sin(time*tone.getFrequency()+tone.getPhase())*tone.getAmplitude());
-					buff[i] = (byte) amp;
+					short amp = (short) (Math.sin(time*tone.getFrequency()*Math.PI*2+tone.getPhase())*tone.getAmplitude());
+					buff[i] += (byte) amp;
 				}
 			}
 			samples += buff.length;
