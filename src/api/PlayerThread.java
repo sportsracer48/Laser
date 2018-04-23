@@ -12,7 +12,7 @@ import javax.sound.sampled.SourceDataLine;
 public class PlayerThread extends Thread {
 
 	private SourceDataLine speaker;
-	private AudioFormat format = new AudioFormat(48000, 16, 1, true, true);
+	private AudioFormat format = new AudioFormat(96000, 16, 1, true, true);
 	private ArrayList<Tone> tones;
 	private long samples = 0;
 
@@ -35,24 +35,23 @@ public class PlayerThread extends Thread {
 
 	@Override
 	public void run() {
-		byte[] buff = new byte[128];
-		short[] shortBuff = new short[64];
+		int[] intBuff = new int[128];
+		int multiplier = (format.getSampleSizeInBits()/8);
+		byte[] buff = new byte[intBuff.length*multiplier];
 		double frameDuration = 1.0 / format.getFrameRate();
-		System.out.println(format.getSampleSizeInBits());
 		while (true) {
-			Arrays.fill(shortBuff, (short)0);
+			Arrays.fill(intBuff, 0);
 			for (Tone tone : tones) {
-				for (int i = 0; i < shortBuff.length; i ++) {
+				for (int i = 0; i < intBuff.length; i ++) {
 					double time = frameDuration*(samples + i);
-					short amp = (short) (Math.sin(time*tone.getFrequency()*Math.PI*2+tone.getPhase())*tone.getAmplitude());
-					shortBuff[i] += amp;
+					int amp = (int) (Math.sin(time*tone.getFrequency()*Math.PI*2+tone.getPhase())*tone.getAmplitude());
+					intBuff[i] += amp;
 				}
 			}
-			for(int i = 0; i < buff.length; i+=2){
-				buff[i] = (byte) (shortBuff[i/2]>>8);
-				buff[i+1] = (byte) (shortBuff[i/2] & 0xFF);
+			for(int i = 0; i < buff.length; i++){
+				buff[i] = (byte) ((intBuff[i/multiplier]>>((multiplier - i%multiplier - 1)*8))&0xFF);
 			}
-			samples += shortBuff.length;
+			samples += intBuff.length;
 			speaker.write(buff, 0, buff.length);
 		}
 	}
