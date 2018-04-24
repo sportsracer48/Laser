@@ -18,11 +18,11 @@ public class API {
 			player.addTone(new Tone(freq*i, 0.0, 512.0));
 		}*/
 		Thread.sleep(1000);
-		Tone tone = player.getTones().get(1);
+		//Tone tone = player.getTones().get(1);
 		double phase = 0;
 		while(true){
 			Thread.sleep(10);
-			tone.setPhase(phase+=(Math.PI*2/100));
+			//tone.setPhase(phase+=(Math.PI*2/100));
 		}
 	}
 }

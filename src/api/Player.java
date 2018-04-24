@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class Player {
 
-	ArrayList<Tone> tones = new ArrayList<Tone>();
+	ArrayList<Tone> tones = new ArrayList<>();
 	
 	public Player() {
 		

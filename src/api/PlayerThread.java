@@ -35,21 +35,26 @@ public class PlayerThread extends Thread {
 
 	@Override
 	public void run() {
-		int[] intBuff = new int[128];
-		int multiplier = (format.getSampleSizeInBits()/8);
-		byte[] buff = new byte[intBuff.length*multiplier];
-		double frameDuration = 1.0 / format.getFrameRate();
+		int bytesPerSample = (format.getSampleSizeInBits()/8);
+		double secondsPerFrame = 1.0 / format.getFrameRate();
+		
+		int[] intBuff = new int[4];
+		byte[] buff = new byte[intBuff.length*bytesPerSample];
+		
+		
+		
 		while (true) {
 			Arrays.fill(intBuff, 0);
+			
 			for (Tone tone : tones) {
 				for (int i = 0; i < intBuff.length; i ++) {
-					double time = frameDuration*(samples + i);
-					int amp = (int) (Math.sin(time*tone.getFrequency()*Math.PI*2+tone.getPhase())*tone.getAmplitude());
+					double time = secondsPerFrame*(samples + i);
+					int amp = (int) Math.round(tone.sample(time));
 					intBuff[i] += amp;
 				}
 			}
 			for(int i = 0; i < buff.length; i++){
-				buff[i] = (byte) ((intBuff[i/multiplier]>>((multiplier - i%multiplier - 1)*8))&0xFF);
+				buff[i] = (byte) ((intBuff[i/bytesPerSample]>>((bytesPerSample - i%bytesPerSample - 1)*8))&0xFF);
 			}
 			samples += intBuff.length;
 			speaker.write(buff, 0, buff.length);
